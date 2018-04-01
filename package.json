@@ -1,0 +1,42 @@
+{
+  "name": "dilithium",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dilithium": "node ./src/main.js",
+    "start": "npm run dilithium",
+    "test":
+      "react-scripts test --coverage --forceExit --collectCoverageFrom=src/**/*.js --collectCoverageFrom=!src/**/*{index,main}.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OR13/dilithium.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OR13/dilithium/issues"
+  },
+  "homepage": "https://github.com/OR13/dilithium#readme",
+  "dependencies": {
+    "bip39": "^2.5.0",
+    "ethereumjs-util": "^5.1.2",
+    "ethereumjs-wallet": "^0.6.0",
+    "fs-extra": "^5.0.0",
+    "json-fs-store": "^1.0.1",
+    "libsodium-wrappers": "^0.7.3",
+    "lodash": "^4.17.5",
+    "node-fetch": "^2.1.2",
+    "secrets.js-grempe": "^1.1.0",
+    "shelljs": "^0.8.1",
+    "vorpal": "^1.12.0",
+    "vorpal-log": "^1.1.0",
+    "vorpal-tour": "0.0.5",
+    "web3": "^1.0.0-beta.27",
+    "web3-provider-engine": "^13.8.0"
+  },
+  "devDependencies": {
+    "react-scripts": "^1.1.1"
+  }
+}

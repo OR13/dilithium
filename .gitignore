@@ -1,0 +1,9 @@
+node_modules
+coverage
+
+attic
+encryptedAccount.json
+env.json
+
+test-data/*
+!test-data/plainText.txt
