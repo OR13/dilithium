@@ -1,8 +1,12 @@
 const symmetricLib = require('../symmetricLib');
-const { loadObject, saveObject } = require('../../../lib');
+const _sodium = require('libsodium-wrappers');
+let sodium;
 
 describe('symmetric', () => {
-  beforeAll(async () => {});
+  beforeAll(async () => {
+    await _sodium.ready;
+    sodium = _sodium;
+  });
   beforeEach(async () => {});
 
   const args = {
@@ -11,34 +15,27 @@ describe('symmetric', () => {
   };
 
   it('symmetric-create-key', async () => {
-    let { name, salt } = await symmetricLib['symmetric-create-key'](args);
-    expect(name).toEqual(args.name);
+    let { key, salt } = await symmetricLib['symmetric-create-key'](args);
     expect(salt.length).toBe(32);
   });
 
   it('symmetric-recover-key', async () => {
-    let stored = await symmetricLib['symmetric-create-key'](args);
-    await saveObject({
-      id: stored.name,
-      salt: stored.salt
+    let { key, salt } = await symmetricLib['symmetric-create-key'](args);
+    let recovered_key = await symmetricLib['symmetric-recover-key']({
+      salt: salt,
+      password: args.password
     });
-    let recovered = await symmetricLib['symmetric-recover-key'](
-      args.name,
-      args.password
-    );
-    expect(recovered.name).toEqual(args.name);
-    expect(recovered.salt).toEqual(stored.salt);
-    expect(recovered.key).toBe(stored.key);
+    expect(recovered_key).toBe(key);
   });
 
   it('symmetric-encrypt', async () => {
     let plainText = '123';
     let key =
       '7ccf6196ae058dac1d02ccd0edd7e0c888e8d2aad609800cab5a0936b6c41018';
-    let { nonce, encrypted } = await symmetricLib['symmetric-encrypt'](
-      plainText,
+    let { nonce, encrypted } = await symmetricLib['symmetric-encrypt']({
+      data: plainText,
       key
-    );
+    });
     expect(nonce.length).toEqual(48);
     expect(encrypted.length).toEqual(38);
   });
@@ -47,15 +44,15 @@ describe('symmetric', () => {
     let plainText = '123';
     let key =
       '7ccf6196ae058dac1d02ccd0edd7e0c888e8d2aad609800cab5a0936b6c41018';
-    let { nonce, encrypted } = await symmetricLib['symmetric-encrypt'](
-      plainText,
+    let { nonce, encrypted } = await symmetricLib['symmetric-encrypt']({
+      data: plainText,
       key
-    );
-    let decrypted = await symmetricLib['symmetric-decrypt'](
-      encrypted,
+    });
+    let decrypted = await symmetricLib['symmetric-decrypt']({
+      data: encrypted,
       nonce,
       key
-    );
+    });
     expect(decrypted).toBe(plainText);
   });
 });

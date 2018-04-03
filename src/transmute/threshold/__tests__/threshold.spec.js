@@ -26,11 +26,7 @@ describe('symmetric', () => {
   ];
 
   it('threshold-shatter-key', async () => {
-    let { hash, shares } = await thresholdLib['threshold-shatter-key'](
-      args.key,
-      args.share_num,
-      args.share_threshold
-    );
+    let { hash, shares } = await thresholdLib['threshold-shatter-key'](args);
     expect(shares.length).toEqual(args.share_num);
   });
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dilithium": "node ./src/main.js",
     "start": "npm run dilithium",
-    "test": "react-scripts test --collectCoverageFrom=src/**/*.js --collectCoverageFrom=!src/**/*{index,main}.js"
+    "test": "react-scripts test "
   },
   "repository": {
     "type": "git",
