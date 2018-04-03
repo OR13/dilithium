@@ -10,6 +10,6 @@ describe('identity', () => {
       password: 'weak'
     };
     let result = await identityLib['identity-create'](args);
-    console.log(result);
+    // console.log(result);
   });
 });

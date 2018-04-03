@@ -1,14 +1,20 @@
 const _sodium = require('libsodium-wrappers');
 
+
+const Web3 = require('web3');
+
+const bip39 = require('bip39');
+const Wallet = require('ethereumjs-wallet');
+const hdkey = require('ethereumjs-wallet/hdkey');
+const ProviderEngine = require('web3-provider-engine');
+const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+const WalletSubprovider = require('web3-provider-engine/subproviders/wallet');
+
 const path = require('path');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const fse = require('fs-extra');
-const Web3 = require('web3');
-const ethereumjsWallet = require('ethereumjs-wallet');
-const ProviderEngine = require('web3-provider-engine');
-const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
-const WalletSubprovider = require('web3-provider-engine/subproviders/wallet');
+
 
 const transmuteConfig = require('../../env.json');
 const RPC_HOST = transmuteConfig.web3ProviderUrl;
@@ -41,31 +47,6 @@ const loadObject = objId => {
       resolve(object);
     });
   });
-};
-
-const getWeb3 = account => {
-  try {
-    const engine = new ProviderEngine();
-
-    if (account) {
-      var wallet = ethereumjsWallet.fromPrivateKey(
-        new Buffer(account.privateKey.replace('0x', ''), 'hex')
-      );
-      engine.addProvider(new WalletSubprovider(wallet, {}));
-    }
-
-    engine.addProvider(
-      new RpcSubprovider({
-        rpcUrl: RPC_HOST
-      })
-    );
-    engine.start();
-
-    let web3 = new Web3(engine);
-    return web3;
-  } catch (e) {
-    console.log('error: ', e);
-  }
 };
 
 const getEncryptedAccount = async () => {
@@ -134,7 +115,37 @@ const getKeyFromPassword = (sodium, password, salt) => {
   });
 };
 
+const sendWei = async (web3, fromAddress, toAddress, amountWei) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.sendTransaction(
+      {
+        from: fromAddress,
+        to: toAddress,
+        value: amountWei
+      },
+      (err, txhash) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(txhash);
+      }
+    );
+  });
+};
 
+const getWeb3 = async (providerUrl, wallet) => {
+  const engine = new ProviderEngine();
+  if (wallet) {
+    engine.addProvider(new WalletSubprovider(wallet, {}));
+  }
+  engine.addProvider(
+    new RpcSubprovider({
+      rpcUrl: providerUrl
+    })
+  );
+  engine.start();
+  return new Web3(engine);
+};
 
 const keypair_to_hex = (sodium, keypair) => {
   return {
@@ -143,8 +154,14 @@ const keypair_to_hex = (sodium, keypair) => {
   };
 };
 
-const get_new_ed25519_and_curve25519_keypairs = sodium => {
-  let ed25519_keypair = sodium.crypto_sign_keypair();
+const keypair_from_hex = (sodium, keypair) => {
+  return {
+    publicKey: sodium.from_hex(keypair.publicKey),
+    privateKey: sodium.from_hex(keypair.privateKey)
+  };
+};
+
+const ed25519_keypair_to_curve25519_keypair = (sodium, ed25519_keypair) => {
   let curve25519_keypair = {
     publicKey: sodium.crypto_sign_ed25519_pk_to_curve25519(
       ed25519_keypair.publicKey
@@ -153,10 +170,30 @@ const get_new_ed25519_and_curve25519_keypairs = sodium => {
       ed25519_keypair.privateKey
     )
   };
-  return {
-    ed25519_keypair: keypair_to_hex(sodium, ed25519_keypair),
-    curve25519_keypair: keypair_to_hex(sodium, curve25519_keypair)
-  };
+  return curve25519_keypair;
+};
+
+
+
+const getWalletFromPrivateKey = (sodium) => {
+  const keypair = sodium.crypto_sign_keypair();
+  const curve25519_keypair = keypair_to_hex(
+    sodium,
+    ed25519_keypair_to_curve25519_keypair(sodium, keypair)
+  );
+  const wallet = Wallet.fromPrivateKey(
+    new Buffer(curve25519_keypair.privateKey, 'hex')
+  );
+  return wallet;
+};
+
+const getWalletFromMnemonic = (sodium) => {
+  const mnemonic = bip39.generateMnemonic();
+  const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+  // Get the first account using the standard hd path.
+  const walletHDPath = "m/44'/60'/0'/0/";
+  const wallet = hdwallet.derivePath(walletHDPath + '0').getWallet();
+  return wallet;
 };
 
 module.exports = {
@@ -166,10 +203,14 @@ module.exports = {
   readFile,
   getDecryptedAccount,
   getEncryptedAccount,
+  getWalletFromPrivateKey,
+  getWalletFromMnemonic,
   getWeb3,
+  sendWei,
   saveObject,
   loadObject,
   keypair_to_hex,
-  get_new_ed25519_and_curve25519_keypairs,
+  keypair_from_hex,
+  ed25519_keypair_to_curve25519_keypair,
   getKeyFromPassword
 };

@@ -9,32 +9,27 @@ const {
 
 module.exports = {
   'symmetric-create-key': async args => {
-    const { name, password } = args;
+    const { password } = args;
     const sodium = await getSodium();
     const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
     const key = await getKeyFromPassword(sodium, password, salt);
     return {
-      name,
       key: sodium.to_hex(key),
       salt: sodium.to_hex(salt)
     };
   },
   'symmetric-recover-key': async args => {
-    const { name, password } = args;
+    const { salt, password } = args;
     const sodium = await getSodium();
-    const stored = await loadObject(name);
     const key = await getKeyFromPassword(
       sodium,
       password,
-      sodium.from_hex(stored.salt)
+      sodium.from_hex(salt)
     );
-    return {
-      name,
-      key: sodium.to_hex(key),
-      salt: stored.salt
-    };
+    return sodium.to_hex(key);
   },
-  'symmetric-encrypt': async (data, key) => {
+  'symmetric-encrypt': async args => {
+    const { data, key } = args;
     const sodium = await getSodium();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encrypted = sodium.crypto_secretbox_easy(
@@ -47,7 +42,8 @@ module.exports = {
       encrypted: sodium.to_hex(encrypted)
     };
   },
-  'symmetric-decrypt': async (data, nonce, key) => {
+  'symmetric-decrypt': async args => {
+    const { data, nonce, key } = args;
     const sodium = await getSodium();
     const decrypted = sodium.crypto_secretbox_open_easy(
       sodium.from_hex(data),

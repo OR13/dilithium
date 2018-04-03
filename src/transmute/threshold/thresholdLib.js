@@ -12,7 +12,8 @@ const {
 } = require('../../lib');
 
 module.exports = {
-  'threshold-shatter-key': async (key, share_num, share_threshold) => {
+  'threshold-shatter-key': async args => {
+    const { key, share_num, share_threshold } = args;
     const sodium = await getSodium();
     var shares = secrets.share(key, share_num, share_threshold);
     const hash = crypto

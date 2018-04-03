@@ -48,15 +48,15 @@ module.exports = vorpal => {
     });
 
   vorpal
-    .command('threshold-recover-key <name> <keySharesDirectory>', '')
+    .command('threshold-recover-key <shares...>', '')
     .action(async (args, callback) => {
-      let shares = await getKeyFromShareDir(args.keySharesDirectory);
-      let comb = await thresholdLib['threshold-recover-key'](shares);
-      if (comb.length !== 64) {
+      const { shares } = args;
+      let key = await thresholdLib['threshold-recover-key'](shares);
+      if (key.length !== 64) {
         vorpal.logger.error('Not enough shares to recover key.\n');
         callback();
       }
-      vorpal.logger.info('recovered key: ' + comb + '\n');
+      vorpal.logger.info('recovered key: ' + key + '\n');
       callback();
     });
 };

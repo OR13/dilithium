@@ -11,10 +11,10 @@ vorpal
     callback();
   });
 
-// require('./account')(vorpal);
-require('./crypto-cli/asymmetric')(vorpal);
-require('./crypto-cli/symmetric')(vorpal);
-require('./crypto-cli/threshold')(vorpal);
+require('./transmute/identity')(vorpal);
+require('./transmute/asymmetric')(vorpal);
+require('./transmute/symmetric')(vorpal);
+require('./transmute/threshold')(vorpal);
 
 vorpal
   .parse(process.argv)
