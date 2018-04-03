@@ -7,6 +7,13 @@ npm i
 npm run test
 ```
 
+
+TODO:
+
+- tighten up asymmetric tests... make sure everything is hex...
+- document usage
+- normalize ethereum env
+
 ### References
 - https://github.com/grempe/secrets.js
 - https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html
