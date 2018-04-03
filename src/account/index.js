@@ -6,7 +6,7 @@ const {
   writeFile,
   getEncryptedAccount,
   getDecryptedAccount
-} = require('../utils/helpers');
+} = require('../lib');
 
 module.exports = vorpal => {
   vorpal

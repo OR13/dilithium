@@ -7,3 +7,5 @@ env.json
 
 test-data/*
 !test-data/plainText.txt
+
+store

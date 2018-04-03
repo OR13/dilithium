@@ -134,18 +134,29 @@ const getKeyFromPassword = (sodium, password, salt) => {
   });
 };
 
-const encrypt = (sodium, data, key) => {
-  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-  let encrypted = sodium.crypto_secretbox_easy(data, nonce, key);
+
+
+const keypair_to_hex = (sodium, keypair) => {
   return {
-    nonce,
-    encrypted
+    publicKey: sodium.to_hex(keypair.publicKey),
+    privateKey: sodium.to_hex(keypair.privateKey)
   };
 };
 
-const decrypt = (sodium, data, nonce, key) => {
-  let decrypted = sodium.crypto_secretbox_open_easy(data, nonce, key);
-  return decrypted;
+const get_new_ed25519_and_curve25519_keypairs = sodium => {
+  let ed25519_keypair = sodium.crypto_sign_keypair();
+  let curve25519_keypair = {
+    publicKey: sodium.crypto_sign_ed25519_pk_to_curve25519(
+      ed25519_keypair.publicKey
+    ),
+    privateKey: sodium.crypto_sign_ed25519_sk_to_curve25519(
+      ed25519_keypair.privateKey
+    )
+  };
+  return {
+    ed25519_keypair: keypair_to_hex(sodium, ed25519_keypair),
+    curve25519_keypair: keypair_to_hex(sodium, curve25519_keypair)
+  };
 };
 
 module.exports = {
@@ -158,7 +169,7 @@ module.exports = {
   getWeb3,
   saveObject,
   loadObject,
-  encrypt,
-  decrypt,
+  keypair_to_hex,
+  get_new_ed25519_and_curve25519_keypairs,
   getKeyFromPassword
 };

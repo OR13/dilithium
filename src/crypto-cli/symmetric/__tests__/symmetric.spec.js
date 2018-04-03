@@ -1,6 +1,4 @@
 const symmetricLib = require('../symmetricLib');
-const commandBase = 'npm run dilithium -- ';
-
 const { loadObject, saveObject } = require('../../../lib');
 
 describe('symmetric', () => {
@@ -13,19 +11,13 @@ describe('symmetric', () => {
   };
 
   it('symmetric-create-key', async () => {
-    let { name, salt } = await symmetricLib['symmetric-create-key'](
-      args.name,
-      args.password
-    );
+    let { name, salt } = await symmetricLib['symmetric-create-key'](args);
     expect(name).toEqual(args.name);
     expect(salt.length).toBe(32);
   });
 
   it('symmetric-recover-key', async () => {
-    let stored = await symmetricLib['symmetric-create-key'](
-      args.name,
-      args.password
-    );
+    let stored = await symmetricLib['symmetric-create-key'](args);
     await saveObject({
       id: stored.name,
       salt: stored.salt

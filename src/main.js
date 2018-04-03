@@ -11,7 +11,8 @@ vorpal
     callback();
   });
 
-require('./account')(vorpal);
+// require('./account')(vorpal);
+require('./crypto-cli/asymmetric')(vorpal);
 require('./crypto-cli/symmetric')(vorpal);
 require('./crypto-cli/threshold')(vorpal);
 

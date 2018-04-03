@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-const { readFile } = require('../../lib');
+const { readFile, saveObject } = require('../../lib');
 
 const thresholdLib = require('./thresholdLib');
 

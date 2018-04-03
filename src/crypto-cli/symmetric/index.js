@@ -15,13 +15,10 @@ module.exports = vorpal => {
   vorpal
     .command(
       'symmetric-create-key <name> <password>',
-      'derive a named symmetric key via crypto_pwhash(password, salt).'
+      'use libsodium crypto_pwhash to derive a symmetric key from a password + salt.'
     )
     .action(async (args, callback) => {
-      let { name, salt } = await symmetricLib['symmetric-create-key'](
-        args.name,
-        args.password
-      );
+      let { name, salt } = await symmetricLib['symmetric-create-key'](args);
       await saveObject({
         id: name,
         salt
@@ -33,12 +30,11 @@ module.exports = vorpal => {
   vorpal
     .command(
       'symmetric-recover-key <name> <password>',
-      'derive a named symmetric key via crypto_pwhash(password, salt).'
+      'use libsodium crypto_pwhash to recover a symmetric key from a password + salt.'
     )
     .action(async (args, callback) => {
       let { name, salt, key } = await symmetricLib['symmetric-recover-key'](
-        args.name,
-        args.password
+        args
       );
       vorpal.logger.info('recovered: ' + key + '\n');
       callback();
