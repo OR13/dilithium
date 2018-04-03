@@ -93,9 +93,6 @@ const getTransmuteId = async (
       sha256_of_key: hash,
       share_num: 3,
       share_threshold: 2
-      // do not leak key here...
-      // key: backupEncryptionKey,
-      // shares
     },
     recovery_claim,
     recovery_claims_history: []
@@ -107,9 +104,6 @@ const getTransmuteId = async (
       ...previousTransmuteId.recovery_claims_history
     ];
   }
-
-  // console.log('cipherTextID', JSON.stringify(cipherTextID, null, 2));
-
   return {
     identity: cipherTextID,
     shares
@@ -139,11 +133,12 @@ module.exports = {
   },
   'identity-recover': async args => {
     const sodium = await getSodium();
-    // console.log('use password and shares to recover stuff...', args);
     const transmuteId = require('../../../transmute-id.json');
     let shares = await getKeyFromShareDir(args.sharesDir);
     let key = await thresholdLib['threshold-recover-key'](shares);
-
+    if (key.length !== 64) {
+      throw new Error('Not enough shares to recover key.');
+    }
     let decrypted_recovery_keypair = JSON.parse(
       await symmetricLib['symmetric-decrypt']({
         key: key,
@@ -151,14 +146,10 @@ module.exports = {
         nonce: transmuteId.recovery_keypair_encrypted.nonce
       })
     );
-
     let verifiedSig = await asymmetricLib['asymmetric-verify']({
       message: sodium.from_hex(transmuteId.recovery_claim),
       publicKey: decrypted_recovery_keypair.publicKey
     });
-
-    // console.log('verifiedSig: ', verifiedSig);
-
     if (verifiedSig === transmuteId.primary_ed25519_public_key) {
       console.log('recovery_claim validated.');
     } else {
@@ -166,26 +157,19 @@ module.exports = {
         'recovery_claim validation failed. primary_ed25519_public_key was not signed with the recovered private key.'
       );
     }
-
     const primary_keypair = decrypted_recovery_keypair;
-
     const recovery_keypair = keypair_to_hex(
       sodium,
       sodium.crypto_sign_keypair()
     );
-
-    // console.log('need to add history length here...');
-
     const recovered_primary_key = await symmetricLib['symmetric-recover-key']({
       salt: transmuteId.primary_key_salt,
       password: args.password
     });
-
     const primary_key = {
       key: recovered_primary_key,
       salt: transmuteId.primary_key_salt
     };
-
     let new_id = await getTransmuteId(
       sodium,
       transmuteId.name,
@@ -194,70 +178,6 @@ module.exports = {
       recovery_keypair,
       transmuteId
     );
-
     return new_id;
   }
 };
-
-// const encryptID = identity => {
-//   return {
-//     name: identity.name,
-//     address: identity.address,
-//     primary_keypair: {}
-//   };
-// };
-
-// asymmetric: {
-//   meta: {
-
-//   },
-
-// const wallet = Wallet.fromPrivateKey(
-//   new Buffer(primary_keypair.curve25519_keypair.privateKey, 'hex')
-// );
-// const address = wallet.getAddress().toString('hex');
-
-// symmetricKeyData,
-// identityKeypair,
-// identityBackupKeypair
-
-// console.log()
-// console.log(pair.privateKey)
-// const { message, privateKey } = args;
-// let data = sodium.crypto_sign(message, pair.privateKey);
-// // console.log(new Buffer(data).toString())
-// let data2 = sodium.crypto_sign_open( data, pair.publicKey)
-// console.log(new Buffer(data2).toString())
-
-// let
-// let identityKeypair = await asymmetricLib['asymmetric-create-keypair']();
-// let identityBackupKeypair = await asymmetricLib[
-//   'asymmetric-create-keypair'
-// ]();
-
-//  // console.log(args)
-//  let pair = sodium.crypto_sign_keypair();
-//  // console.log(pair.privateKey)
-//  // const { message, privateKey } = args;
-
-//  let pk = sodium.crypto_sign_ed25519_pk_to_curve25519(pair.publicKey);
-//  let sk = sodium.crypto_sign_ed25519_sk_to_curve25519(pair.privateKey);
-
-//  // console.log(convertedKey)
-//  let keypair = sodium.crypto_box_keypair();
-
-//  let data = await this['asymmetric-encrypt']({
-//    payload: 'hello',
-//    senderPrivateKey: sodium.to_hex(sk),
-//    recipientPublicKey: sodium.to_hex(keypair.publicKey)
-//  });
-
-//  console.log(data);
-
-//  let data2 = await this['asymmetric-decrypt']({
-//    payload: data,
-//    senderPublicKey: sodium.to_hex(pk),
-//    recipientPrivateKey: sodium.to_hex(keypair.privateKey)
-//  });
-
-//  console.log('decrypted: ', data2)
