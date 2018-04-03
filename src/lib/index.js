@@ -1,6 +1,6 @@
 const _sodium = require('libsodium-wrappers');
 
-
+const _ = require('lodash');
 const Web3 = require('web3');
 
 const bip39 = require('bip39');
@@ -14,7 +14,6 @@ const path = require('path');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const fse = require('fs-extra');
-
 
 const transmuteConfig = require('../../env.json');
 const RPC_HOST = transmuteConfig.web3ProviderUrl;
@@ -173,9 +172,7 @@ const ed25519_keypair_to_curve25519_keypair = (sodium, ed25519_keypair) => {
   return curve25519_keypair;
 };
 
-
-
-const getWalletFromPrivateKey = (sodium) => {
+const getWalletFromPrivateKey = sodium => {
   const keypair = sodium.crypto_sign_keypair();
   const curve25519_keypair = keypair_to_hex(
     sodium,
@@ -187,7 +184,7 @@ const getWalletFromPrivateKey = (sodium) => {
   return wallet;
 };
 
-const getWalletFromMnemonic = (sodium) => {
+const getWalletFromMnemonic = sodium => {
   const mnemonic = bip39.generateMnemonic();
   const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
   // Get the first account using the standard hd path.
@@ -196,8 +193,23 @@ const getWalletFromMnemonic = (sodium) => {
   return wallet;
 };
 
+const getKeyFromShareDir = async shareDir => {
+  let fileNamesInSharesDir = fs.readdirSync(shareDir);
+  let sharesJson = await Promise.all(
+    fileNamesInSharesDir.map(async filename => {
+      let buf = await readFile(path.join(shareDir, filename));
+      return JSON.parse(buf.toString());
+    })
+  );
+  let shares = _.map(sharesJson, share => {
+    return share.share;
+  });
+  return shares;
+};
+
 module.exports = {
   getSodium,
+  getKeyFromShareDir,
   generateSecretKey,
   writeFile,
   readFile,

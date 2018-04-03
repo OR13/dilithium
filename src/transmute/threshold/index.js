@@ -6,20 +6,6 @@ const { readFile, saveObject } = require('../../lib');
 
 const thresholdLib = require('./thresholdLib');
 
-const getKeyFromShareDir = async shareDir => {
-  let fileNamesInSharesDir = fs.readdirSync(shareDir);
-  let sharesJson = await Promise.all(
-    fileNamesInSharesDir.map(async filename => {
-      let buf = await readFile(path.join(shareDir, filename));
-      return JSON.parse(buf.toString());
-    })
-  );
-  let shares = _.map(sharesJson, share => {
-    return share.share;
-  });
-  return shares;
-};
-
 module.exports = vorpal => {
   vorpal
     .command(

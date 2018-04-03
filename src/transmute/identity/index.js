@@ -24,9 +24,45 @@ module.exports = vorpal => {
       const { name } = args;
       const target = '.';
       const { identity, shares } = await identityLib['identity-create'](args);
-      vorpal.logger.info(
-        'identity: ' + JSON.stringify(identity, null, 2) + '\n'
+      // vorpal.logger.info(
+      //   'identity: ' + JSON.stringify(identity, null, 2) + '\n'
+      // );
+      console.log('identity created.');
+      await Promise.all(
+        shares.map((share, i) => {
+          let shareId = 'share.' + i + '.json';
+          let sharePath = path.join(target, 'recovery-shares', shareId);
+          let shareJson = JSON.stringify(
+            {
+              id: i,
+              sha256_of_key: identity.recovery_key.sha256_of_key,
+              num_shares: 3,
+              share_threshold: 2,
+              share: share
+            },
+            null,
+            2
+          );
+          return writeFile(sharePath, shareJson);
+        })
       );
+      let identityPath = path.join(target, 'transmute-id.json');
+      await writeFile(identityPath, JSON.stringify(identity, null, 2));
+      callback();
+    });
+
+  vorpal
+    .command(
+      'identity-recover <password> <sharesDir>',
+      'recover an execute an identity recover operation via shares'
+    )
+    .action(async (args, callback) => {
+      const { name } = args;
+      const target = '.';
+      const { identity, shares } = await identityLib['identity-recover'](args);
+      // vorpal.logger.info(
+      //   'identity: ' + JSON.stringify(identity, null, 2) + '\n'
+      // );
       await Promise.all(
         shares.map((share, i) => {
           let shareId = 'share.' + i + '.json';
