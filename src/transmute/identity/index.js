@@ -1,6 +1,6 @@
 const path = require('path');
 const Wallet = require('ethereumjs-wallet');
-
+const crypto = require('crypto');
 const {
   getSodium,
   readFile,
@@ -27,7 +27,7 @@ module.exports = vorpal => {
       // vorpal.logger.info(
       //   'identity: ' + JSON.stringify(identity, null, 2) + '\n'
       // );
-      console.log('identity created.');
+
       await Promise.all(
         shares.map((share, i) => {
           let shareId = 'share.' + i + '.json';
@@ -48,21 +48,61 @@ module.exports = vorpal => {
       );
       let identityPath = path.join(target, 'transmute-id.json');
       await writeFile(identityPath, JSON.stringify(identity, null, 2));
+
+      let id = await readFile(identityPath);
+
+      const hash = crypto
+        .createHash('sha384')
+        .update(id)
+        .digest('hex');
+
+      vorpal.logger.info('identity created.');
+      vorpal.logger.info('integrity: ' + hash + '\n');
+
       callback();
     });
 
   vorpal
     .command(
-      'identity-recover <password> <sharesDir>',
+      'identity-verify-integrity <pathToId> <integrity>',
+      'verify an identity has not been tampered with.'
+    )
+    .action(async (args, callback) => {
+      const { pathToId, integrity } = args;
+
+      let id = await readFile(pathToId);
+
+      const hash = crypto
+        .createHash('sha384')
+        .update(id)
+        .digest('hex');
+
+      let integrity_match = hash === integrity;
+
+      if (integrity_match) {
+        vorpal.logger.info('integrity: ' + integrity_match + '\n');
+      } else {
+        vorpal.logger.error('integrity: ' + integrity_match + '\n');
+      }
+
+      callback();
+    });
+
+  vorpal
+    .command(
+      'identity-recover <old_password> <new_password> <shares_dir> [integrity]',
       'recover an execute an identity recover operation via shares'
     )
     .action(async (args, callback) => {
-      const { name } = args;
       const target = '.';
       const { identity, shares } = await identityLib['identity-recover'](args);
+
       // vorpal.logger.info(
       //   'identity: ' + JSON.stringify(identity, null, 2) + '\n'
       // );
+
+      // vorpal.logger.info('recovery_claim validated.\n');
+
       await Promise.all(
         shares.map((share, i) => {
           let shareId = 'share.' + i + '.json';
@@ -83,6 +123,52 @@ module.exports = vorpal => {
       );
       let identityPath = path.join(target, 'transmute-id.json');
       await writeFile(identityPath, JSON.stringify(identity, null, 2));
+
+      const new_id = await readFile(identityPath);
+
+      const new_integrity = crypto
+        .createHash('sha384')
+        .update(new_id)
+        .digest('hex');
+
+      // vorpal.logger.info('identity recovered.');
+      // vorpal.logger.info('integrity: ' + new_integrity + '\n');
+
+      callback();
+    });
+
+  vorpal
+    .command(
+      'change-password <old_password> <new_password>',
+      'change the password for a transmute_id'
+    )
+    .action(async (args, callback) => {
+      const target = '.';
+      const transmute_id = require('../../../transmute-id.json');
+      const new_transmute_id = await require('./change-password')({
+        ...args,
+        transmute_id
+      });
+      let identityPath = path.join(target, 'transmute-id.json');
+      await writeFile(identityPath, JSON.stringify(new_transmute_id, null, 2));
+
+      let id = await readFile(identityPath);
+
+      const hash = crypto
+        .createHash('sha384')
+        .update(id)
+        .digest('hex');
+
+      vorpal.logger.info('password changed.');
+      vorpal.logger.info('integrity: ' + hash + '\n');
+
+      callback();
+    });
+
+  vorpal
+    .command('trace-claims', 'show the default accounts')
+    .action(async (args, callback) => {
+      await require('./identity-trace-claims')(args);
       callback();
     });
 

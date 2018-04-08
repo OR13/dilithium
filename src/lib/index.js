@@ -174,12 +174,11 @@ const ed25519_keypair_to_curve25519_keypair = (sodium, ed25519_keypair) => {
 
 const getWalletFromPrivateKey = sodium => {
   const keypair = sodium.crypto_sign_keypair();
-  const curve25519_keypair = keypair_to_hex(
-    sodium,
-    ed25519_keypair_to_curve25519_keypair(sodium, keypair)
+  const curve25519_privateKey = sodium.crypto_sign_ed25519_sk_to_curve25519(
+    keypair.privateKey
   );
   const wallet = Wallet.fromPrivateKey(
-    new Buffer(curve25519_keypair.privateKey, 'hex')
+    new Buffer(sodium.to_hex(curve25519_privateKey), 'hex')
   );
   return wallet;
 };
@@ -206,6 +205,9 @@ const getKeyFromShareDir = async shareDir => {
   });
   return shares;
 };
+
+
+
 
 module.exports = {
   getSodium,

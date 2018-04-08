@@ -13,6 +13,9 @@ TODO:
 - tighten up asymmetric tests... make sure everything is hex...
 - document usage
 - normalize ethereum env
+- add integrity checking...
+- password complexity checking...
+- mandatory password change with account recovery...
 
 
 ### Concept
@@ -36,6 +39,17 @@ system saves ciphertext of keys, salts, claims and public information to transmu
 user can use their password to unlock primary keypair, or use recovery-shares to upgrade their identity.
 
 currently, no support for primary_key password change exists, but thats easy to add.
+
+
+### Integrity
+
+- https://www.srihash.org/
+
+```
+openssl dgst -sha384 -binary transmute-id.json | openssl base64 -A
+```
+
+
 
 ### References
 - https://github.com/grempe/secrets.js
