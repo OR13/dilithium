@@ -49,7 +49,7 @@ const get_server = async () => {
 
 describe('tipal.get_web3_from_private_key', () => {
   it('works as expected', async () => {
-    const server = await get_server();
+    // const server = await get_server();
     const { web3 } = tipal.get_web3({
       provider_url: 'http://localhost:8545'
     });

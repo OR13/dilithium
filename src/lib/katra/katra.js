@@ -187,7 +187,7 @@ const plaintext_to_ciphertext_and_shares = async ({
     salt: id_password_salt
   });
 
-  console.log(id_password_key);
+  // console.log(id_password_key);
 
   // console.log(id_password_key);
   // generate a symmetric recovery_key used to encrypt the recovery_keypair
@@ -246,12 +246,14 @@ const ciphertext_and_shares_to_plaintext = async ({
 }) => {
   const sodium = await init_sodium();
 
-  console.log(ciphertext_id);
+  // console.log(ciphertext_id);
 
-  const id_password_key = key_from_password_and_salt({
+  const id_password_key = await key_from_password_and_salt({
     password,
     salt: ciphertext_id.id_password_salt
   });
+
+  // console.log(id_password_key)
   const recovery_key = secrets.combine(shares);
   return {
     ethereum_address: ciphertext_id.ethereum_address,

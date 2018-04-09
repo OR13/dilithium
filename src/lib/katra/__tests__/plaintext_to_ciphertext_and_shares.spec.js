@@ -28,6 +28,7 @@ describe('katra.plaintext_to_ciphertext_and_shares', () => {
       plaintext_id,
       password
     });
+    // console.log(ciphertext_id, shares)
     const plaintext_id2 = await katra.ciphertext_and_shares_to_plaintext({
       password,
       ciphertext_id,
