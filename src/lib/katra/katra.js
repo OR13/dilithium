@@ -5,6 +5,8 @@
 const _sodium = require('libsodium-wrappers');
 const secrets = require('secrets.js-grempe');
 
+const tipal = require('../tipal');
+
 const init_sodium = async () => {
   await _sodium.ready;
   return _sodium;
@@ -43,7 +45,12 @@ const identity_continuity_claim = async ({ primary, recovery }) => {
 
 const generate_id = async ({ primary, recovery, history }) => {
   const sodium = await init_sodium();
+  const ethereum_wallet = await tipal.get_wallet_from_keypair({
+    keypair: primary
+  });
+  const ethereum_address = '0x' + ethereum_wallet.getAddress().toString('hex');
   return {
+    ethereum_address,
     primary,
     recovery,
     history: history || [await identity_continuity_claim({ primary, recovery })]
@@ -170,20 +177,18 @@ const plaintext_to_ciphertext_and_shares = async ({
   password
 }) => {
   const sodium = await init_sodium();
-  const id_password_salt = sodium.randombytes_buf(
-    sodium.crypto_pwhash_SALTBYTES
+  const id_password_salt = sodium.to_hex(
+    sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES)
   );
+  // console.log(id_password_salt)
 
-  var id_password_key = sodium.to_hex(
-    sodium.crypto_pwhash(
-      sodium.crypto_box_SEEDBYTES,
-      password,
-      id_password_salt,
-      sodium.crypto_pwhash_OPSLIMIT_MIN,
-      sodium.crypto_pwhash_MEMLIMIT_MIN,
-      sodium.crypto_pwhash_ALG_DEFAULT
-    )
-  );
+  const id_password_key = await key_from_password_and_salt({
+    password,
+    salt: id_password_salt
+  });
+
+  console.log(id_password_key);
+
   // console.log(id_password_key);
   // generate a symmetric recovery_key used to encrypt the recovery_keypair
   const recovery_key = sodium.to_hex(
@@ -196,7 +201,8 @@ const plaintext_to_ciphertext_and_shares = async ({
 
   return {
     ciphertext_id: {
-      id_password_salt: sodium.to_hex(id_password_salt),
+      ethereum_address: plaintext_id.ethereum_address,
+      id_password_salt: id_password_salt,
       primary: {
         publicKey: plaintext_id.primary.publicKey,
         privateKey: await encrypt_json({
@@ -218,6 +224,21 @@ const plaintext_to_ciphertext_and_shares = async ({
     shares
   };
 };
+
+const key_from_password_and_salt = async ({ password, salt }) => {
+  const sodium = await init_sodium();
+  const id_password_key = sodium.to_hex(
+    sodium.crypto_pwhash(
+      sodium.crypto_box_SEEDBYTES,
+      password,
+      sodium.from_hex(salt),
+      sodium.crypto_pwhash_OPSLIMIT_MIN,
+      sodium.crypto_pwhash_MEMLIMIT_MIN,
+      sodium.crypto_pwhash_ALG_DEFAULT
+    )
+  );
+  return id_password_key;
+};
 const ciphertext_and_shares_to_plaintext = async ({
   password,
   ciphertext_id,
@@ -225,18 +246,15 @@ const ciphertext_and_shares_to_plaintext = async ({
 }) => {
   const sodium = await init_sodium();
 
-  const id_password_key = sodium.to_hex(
-    sodium.crypto_pwhash(
-      sodium.crypto_box_SEEDBYTES,
-      password,
-      sodium.from_hex(ciphertext_id.id_password_salt),
-      sodium.crypto_pwhash_OPSLIMIT_MIN,
-      sodium.crypto_pwhash_MEMLIMIT_MIN,
-      sodium.crypto_pwhash_ALG_DEFAULT
-    )
-  );
+  console.log(ciphertext_id);
+
+  const id_password_key = key_from_password_and_salt({
+    password,
+    salt: ciphertext_id.id_password_salt
+  });
   const recovery_key = secrets.combine(shares);
   return {
+    ethereum_address: ciphertext_id.ethereum_address,
     primary: {
       publicKey: ciphertext_id.primary.publicKey,
       privateKey: await decrypt_json({
@@ -274,6 +292,9 @@ const test_ciphertext_id_integrity = async ({ ciphertext_id, integrity }) => {
 
 module.exports = {
   new_keypair,
+  key_from_password_and_salt,
+  encrypt_json,
+  decrypt_json,
   identity_continuity_claim,
   generate_id,
   recover_id,

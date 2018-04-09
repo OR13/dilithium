@@ -1,0 +1,18 @@
+const tipal = require('../tipal');
+const katra = require('../../katra');
+
+describe('tipal.get_wallet_from_keypair', () => {
+  it('get ethereum js wallet from keypair', async () => {
+    const primary = await katra.new_keypair();
+    const recovery = await katra.new_keypair();
+    const current_id = await katra.generate_id({
+      primary,
+      recovery
+    });
+    const wallet = await tipal.get_wallet_from_keypair({
+      keypair: current_id.primary
+    });
+    expect(wallet._privKey).toBeDefined();
+    // console.log(wallet);
+  });
+});

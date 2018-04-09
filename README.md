@@ -41,13 +41,13 @@ user can use their password to unlock primary keypair, or use recovery-shares to
 currently, no support for primary_key password change exists, but thats easy to add.
 
 
-### Integrity
-
-- https://www.srihash.org/
+### Usage Tips
 
 ```
-openssl dgst -sha384 -binary transmute-id.json | openssl base64 -A
+node ./src/main.js default-accounts  | jq '.accounts'
 ```
+
+
 
 
 

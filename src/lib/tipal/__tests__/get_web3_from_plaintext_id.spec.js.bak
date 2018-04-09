@@ -1,0 +1,33 @@
+const Ganache = require('ganache-core');
+const tipal = require('../tipal');
+const katra = require('../../katra');
+
+describe('tipal.get_web3_from_private_key', () => {
+  let server;
+  beforeAll(() => {
+    server = Ganache.server();
+    server.listen('8545', (err, blockchain) => {
+      // console.log(err, blockchain);
+    });
+  });
+  it('get web3 from keypair', async () => {
+    const primary = await katra.new_keypair();
+    const recovery = await katra.new_keypair();
+    const current_id = await katra.generate_id({
+      primary,
+      recovery
+    });
+    const { web3 } = await tipal.get_web3_from_private_key({
+      plaintext_id: current_id,
+      provider_url: 'http://localhost:8545'
+    });
+    // console.log(wallet);
+    let accounts = await web3.eth.getAccounts();
+    // console.log(accounts);
+    expect(accounts.length).toBe(1);
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+});

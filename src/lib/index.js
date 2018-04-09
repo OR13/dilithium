@@ -206,9 +206,6 @@ const getKeyFromShareDir = async shareDir => {
   return shares;
 };
 
-
-
-
 module.exports = {
   getSodium,
   getKeyFromShareDir,

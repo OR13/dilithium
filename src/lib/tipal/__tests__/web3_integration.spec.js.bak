@@ -1,0 +1,124 @@
+const Ganache = require('ganache-core');
+const Web3 = require('web3');
+
+const tipal = require('../tipal');
+const katra = require('../../katra');
+
+describe('tipal.ciphertext_id_to_address', () => {
+  let server;
+  let cipher_and_shares;
+
+  beforeAll(done => {
+    server = Ganache.server();
+    server.listen('8545', (err, blockchain) => {
+      done();
+    });
+  });
+
+  it('works with vanilla web3', async () => {
+    const { primary, recovery, password } = {
+      primary: {
+        publicKey:
+          'a234e1a04ea14bfa3567e71ff55116a411945f40680eb0311b5c474390b57aa8',
+        privateKey:
+          'aed7a9a2200380078a71f95fa36a6ff397e33290597d0397f2f0d7e608394f78a234e1a04ea14bfa3567e71ff55116a411945f40680eb0311b5c474390b57aa8',
+        keyType: 'ed25519'
+      },
+      recovery: {
+        publicKey:
+          '94e02ac4016d8a88a508bd10987824674dba6fce25491526d0271e20ee6c9798',
+        privateKey:
+          '4a0c0468780e20aeda824330e0bf245a7a7a5c33e0ea2013c250c0eac46afe5994e02ac4016d8a88a508bd10987824674dba6fce25491526d0271e20ee6c9798',
+        keyType: 'ed25519'
+      },
+      password: 'Tuvok-1-4-9-4-Lambda'
+    };
+    const plaintext_id = await katra.generate_id({ primary, recovery });
+    cipher_and_shares = await katra.plaintext_to_ciphertext_and_shares({
+      plaintext_id,
+      password
+    });
+    const { ciphertext_id } = cipher_and_shares;
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider('http://localhost:8545')
+    );
+    // console.log(web3)
+    const address = await tipal.ciphertext_id_to_address({
+      ciphertext_id
+    });
+    // console.log(address);
+    let balance = await web3.eth.getBalance(address);
+    // console.log(balance);
+    const accounts = await web3.eth.getAccounts();
+    let txhash = await tipal.send_wei(web3, accounts[0], address, 50000000000);
+    // console.log(txhash);
+    balance = await web3.eth.getBalance(address);
+    // console.log(balance);
+    expect(balance).toBe('50000000000');
+  });
+
+  it('works with provider engine', async () => {
+    const { primary, recovery, password } = {
+      primary: {
+        publicKey:
+          'a234e1a04ea14bfa3567e71ff55116a411945f40680eb0311b5c474390b57aa8',
+        privateKey:
+          'aed7a9a2200380078a71f95fa36a6ff397e33290597d0397f2f0d7e608394f78a234e1a04ea14bfa3567e71ff55116a411945f40680eb0311b5c474390b57aa8',
+        keyType: 'ed25519'
+      },
+      recovery: {
+        publicKey:
+          '94e02ac4016d8a88a508bd10987824674dba6fce25491526d0271e20ee6c9798',
+        privateKey:
+          '4a0c0468780e20aeda824330e0bf245a7a7a5c33e0ea2013c250c0eac46afe5994e02ac4016d8a88a508bd10987824674dba6fce25491526d0271e20ee6c9798',
+        keyType: 'ed25519'
+      },
+      password: 'Tuvok-1-4-9-4-Lambda'
+    };
+    const plaintext_id = await katra.generate_id({ primary, recovery });
+    cipher_and_shares = await katra.plaintext_to_ciphertext_and_shares({
+      plaintext_id,
+      password
+    });
+    const { ciphertext_id } = cipher_and_shares;
+    const reg = await tipal.get_web3({
+      provider_url: 'http://localhost:8545'
+    });
+    // console.log(web3)
+    const address = await tipal.ciphertext_id_to_address({
+      ciphertext_id
+    });
+    // console.log(address);
+    let originalBalance = await reg.web3.eth.getBalance(address);
+    // console.log(balance);
+    const accounts = await reg.web3.eth.getAccounts();
+    let txhash = await tipal.send_wei(
+      reg.web3,
+      accounts[0],
+      address,
+      50000000000
+    );
+    // console.log(txhash);
+    let newBalance = await reg.web3.eth.getBalance(address);
+    // console.log(balance);
+    expect(newBalance).toBe(
+      (parseInt(originalBalance) + 50000000000).toString()
+    );
+
+    const { web3, engine } = await tipal.get_web3_from_private_key({
+      plaintext_id: plaintext_id,
+      provider_url: 'http://localhost:8545'
+    });
+
+    let accounts2 = await web3.eth.getAccounts();
+    // console.log(accounts2)
+    // let balance3 = await reg.web3.eth.getBalance(accounts2[0]);
+    console.log(accounts2[0]);
+    console.log(address);
+  });
+
+  afterAll(done => {
+    server.close();
+    done();
+  });
+});

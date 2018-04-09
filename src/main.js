@@ -36,12 +36,10 @@ vorpal
     callback();
   });
 
-require('./transmute/identity')(vorpal);
-require('./transmute/asymmetric')(vorpal);
-require('./transmute/symmetric')(vorpal);
-require('./transmute/threshold')(vorpal);
+require('./lib/katra/katra-vorpal')(vorpal);
+require('./lib/tipal/tipal-vorpal')(vorpal);
 
 vorpal
   .parse(process.argv)
   .delimiter('🦄   $')
-  .show();
+  // .show();
