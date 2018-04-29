@@ -2,5 +2,5 @@ Key-Type: eddsa
 Key-Curve: Ed25519
 Key-Usage: sign auth
 Name-Real: Alice
-Expire-Date: 1d
+Expire-Date: 3d
 Passphrase: secret

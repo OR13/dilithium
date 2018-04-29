@@ -7,10 +7,9 @@
     "dilithium": "node ./src/main.js",
     "clean": "rm -rf ./data",
     "start": "npm run dilithium",
-    "test": "react-scripts test ",
+    "test": "react-scripts test --testPathIgnorePatterns='<rootDir>/src/lib/(?:.+?)/__tests__/' ",
     "docker:build": "docker build -t or13/dilithium .",
-    "docker:run":
-      "docker run -v `pwd`/data:/usr/src/app/data -it or13/dilithium ",
+    "docker:run": "docker run -v `pwd`/data:/usr/src/app/data -it or13/dilithium ",
     "docker:test": "npm run clean && npm run docker:build && npm run docker:run ./setup.sh"
   },
   "repository": {
@@ -25,6 +24,7 @@
   "homepage": "https://github.com/OR13/dilithium#readme",
   "dependencies": {
     "bip39": "^2.5.0",
+    "bluebird": "^3.5.1",
     "ethereumjs-util": "^5.1.2",
     "ethereumjs-wallet": "^0.6.0",
     "fs-extra": "^5.0.0",
@@ -34,6 +34,7 @@
     "libsodium-wrappers": "^0.7.3",
     "lodash": "^4.17.5",
     "node-fetch": "^2.1.2",
+    "openpgp": "^3.0.8",
     "secrets.js-grempe": "^1.1.0",
     "vorpal": "^1.12.0",
     "vorpal-log": "^1.1.0",
