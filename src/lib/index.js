@@ -15,8 +15,7 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const fse = require('fs-extra');
 
-const transmuteConfig = require('../../env.json');
-const RPC_HOST = transmuteConfig.web3ProviderUrl;
+const RPC_HOST = 'http://localhost:8545'
 
 var store = require('json-fs-store')('./store');
 

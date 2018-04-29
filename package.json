@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dilithium": "node ./src/main.js",
+    "clean": "rm -rf ./data",
     "start": "npm run dilithium",
-    "test": "react-scripts test "
+    "test": "react-scripts test ",
+    "docker:build": "docker build -t or13/dilithium .",
+    "docker:run":
+      "docker run -v `pwd`/data:/usr/src/app/data -it or13/dilithium ",
+    "docker:test": "npm run clean && npm run docker:build && npm run docker:run ./setup.sh"
   },
   "repository": {
     "type": "git",
