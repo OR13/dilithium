@@ -1,0 +1,30 @@
+{
+  "@context": "https://w3id.org/did/v1",
+  "id": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc",
+  "publicKey": [
+    {
+      "id": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc#keys-1",
+      "type": "Ed25519VerificationKey2018",
+      "owner": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc",
+      "publicKey": "abd777715191dd3ef36afd13e4210d4dd2393d93c7e1353014b70fad09451adb"
+    },
+    {
+      "id": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc#keys-2",
+      "type": "Secp256k1VerificationKey2018",
+      "owner": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc",
+      "publicKeyPem": "-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: OpenPGP.js v3.1.2\r\nComment: https://openpgpjs.org\r\n\r\nxk8EW3o3KBMFK4EEAAoCAwTZyNFovfwKfHzz14mHIT77GIlPZPBoCvd4XOKM\nvZPNf0xVxk9gggGH/2SQeXUTAoM5yDiGmXZBQEaYpE0rICd1zSA1YjNiNTk5\nMjUyZDU3YzJjYThlZTZlYWZjMjViNDE0Y8J3BBATCAApBQJbejcoBgsJBwgD\nAgkQm9zY/CP8+88EFQgKAgMWAgECGQECGwMCHgEAADqoAP4gUetJnNCEFlZ/\nQ142stNqUybumBfRhcI89cjQzaP3yQEAiCF7SWs/ccLSjwE61K/pJuYYoYhs\ntpRYkb/z/B5PxjHOUwRbejcoEgUrgQQACgIDBA9fhJw5/nWBYA3ExONXxe6x\nWv4K+6oDZUoquXK+9V3iB/yhBYCgKR6DjLUyQXJ3WYqWejcQK9U7rrq0U6A1\n5MoDAQgHwmEEGBMIABMFAlt6NygJEJvc2Pwj/PvPAhsMAABkVwD+PfgYwRb7\n3g1mnCycnkowV6V0TUpbLOTKAwSwGXikRtUA/jl0LibMfe6acmwT7hUs9Oyo\n+nk3ZYwstQOp9yJLfXWA\r\n=oYt4\r\n-----END PGP PUBLIC KEY BLOCK-----\r\n\r\n"
+    },
+    {
+      "id": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc#keys-3",
+      "type": "Secp256k1VerificationKey2018",
+      "owner": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc",
+      "publicKey": "3c7b56a241d8802adb0f65c6cf57cbc7b166ba511166ee0e7becf1f0dadc1f23087842b4fc29bdd2e5d154e07c9e04b59154e6c73ca20e61004bc8a84bee1784"
+    }
+  ],
+  "authentication": [
+    {
+      "type": "Ed25519SignatureAuthentication2018",
+      "publicKey": "did:tst:0xa1fa1f64453681cf489cecc8ec940b64aca2cf4167948211359ef0ae3e9c77cc#keys-1"
+    }
+  ]
+}
